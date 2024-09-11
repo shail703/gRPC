@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+service LMS {
+    // Authentication
+    rpc RegisterStudent(RegisterRequest) returns (RegisterResponse);
+    rpc Login(LoginRequest) returns (LoginResponse);
+    rpc Logout(LogoutRequest) returns (LogoutResponse);
+
+    // Get Requests
+    rpc Get(GetRequest) returns (GetResponse);
+    
+    // Post Requests
+    rpc Post(PostRequest) returns (PostResponse);
+}
+
+// Request and Response for Registration
+message RegisterRequest {
+    string username = 1;
+    string password = 2;
+}
+
+message RegisterResponse {
+    bool status = 1;
+    string message = 2;
+}
+
+// Request and Response for Login
+message LoginRequest {
+    string username = 1;
+    string password = 2;
+}
+
+message LoginResponse {
+    bool status = 1;
+    string token = 2; // Token issued upon successful login
+    string message = 3;
+}
+
+// Request and Response for Logout
+message LogoutRequest {
+    string token = 1;
+}
+
+message LogoutResponse {
+    bool status = 1;
+    string message = 2;
+}
+
+// GetRequest and GetResponse for various "GET" operations (viewing data)
+message GetRequest {
+    string token = 1;
+    string type = 2;  // Type of request (e.g., "view_assignments", "view_grades", "view_submissions")
+    string optional_data = 3;  // For passing assignment ID or other specific data if needed
+}
+
+message GetResponse {
+    bool status = 1;
+    repeated string data = 2;  // List of data (e.g., assignments, grades, submissions, doubts)
+    string message = 3;  // For additional status messages
+}
+
+// PostRequest and PostResponse for various "POST" operations (submitting data)
+message PostRequest {
+    string token = 1;
+    string type = 2;  // Type of post request (e.g., "submit_assignment", "add_doubt", "grade_assignment")
+    string data = 3;  // Data to post (e.g., assignment submission, doubt, grade, etc.)
+}
+
+message PostResponse {
+    bool status = 1;
+    string message = 2;  // For success/failure message
+}

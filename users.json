@@ -1,0 +1,10 @@
+{
+    "teacher": {
+        "password": "1234",
+        "role": "teacher"
+    },
+    "shail": {
+        "password": "shaillogin",
+        "role": "student"
+    }
+}
