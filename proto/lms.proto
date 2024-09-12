@@ -1,19 +1,16 @@
 syntax = "proto3";
 
+package lms;
+
 service LMS {
-    // Authentication
     rpc RegisterStudent(RegisterRequest) returns (RegisterResponse);
     rpc Login(LoginRequest) returns (LoginResponse);
-    rpc Logout(LogoutRequest) returns (LogoutResponse);
-
-    // Get Requests
     rpc Get(GetRequest) returns (GetResponse);
-    
-    // Post Requests
     rpc Post(PostRequest) returns (PostResponse);
+    rpc Logout(LogoutRequest) returns (LogoutResponse);
 }
 
-// Request and Response for Registration
+// Register a student
 message RegisterRequest {
     string username = 1;
     string password = 2;
@@ -24,7 +21,7 @@ message RegisterResponse {
     string message = 2;
 }
 
-// Request and Response for Login
+// Login to the system
 message LoginRequest {
     string username = 1;
     string password = 2;
@@ -32,41 +29,41 @@ message LoginRequest {
 
 message LoginResponse {
     bool status = 1;
-    string token = 2; // Token issued upon successful login
+    string token = 2;
     string message = 3;
 }
 
-// Request and Response for Logout
+// General request for fetching data (e.g., assignments, submissions, grades)
+message GetRequest {
+    string type = 1;           // e.g., view_assignments, view_submissions, view_grades
+    string optional_data = 2;  // Used for additional information (e.g., assignment ID)
+    string token = 3;          // Authentication token for the user
+}
+
+message GetResponse {
+    bool status = 1;
+    repeated string pending_assignments = 2;
+    repeated string submitted_assignments = 3;
+    string message = 4;
+    string data = 5;  // Ensure the "data" field is defined correctly.
+}
+
+// General request for submitting data (e.g., adding assignments, submissions, grading)
+message PostRequest {
+    string type = 1;           // e.g., add_assignment, submit_assignment, grade
+    string data = 2;           // The actual data being sent
+    string token = 3;          // Authentication token for the user
+}
+
+message PostResponse {
+    bool status = 1;
+}
+
+// Logout request
 message LogoutRequest {
     string token = 1;
 }
 
 message LogoutResponse {
     bool status = 1;
-    string message = 2;
-}
-
-// GetRequest and GetResponse for various "GET" operations (viewing data)
-message GetRequest {
-    string token = 1;
-    string type = 2;  // Type of request (e.g., "view_assignments", "view_grades", "view_submissions")
-    string optional_data = 3;  // For passing assignment ID or other specific data if needed
-}
-
-message GetResponse {
-    bool status = 1;
-    repeated string data = 2;  // List of data (e.g., assignments, grades, submissions, doubts)
-    string message = 3;  // For additional status messages
-}
-
-// PostRequest and PostResponse for various "POST" operations (submitting data)
-message PostRequest {
-    string token = 1;
-    string type = 2;  // Type of post request (e.g., "submit_assignment", "add_doubt", "grade_assignment")
-    string data = 3;  // Data to post (e.g., assignment submission, doubt, grade, etc.)
-}
-
-message PostResponse {
-    bool status = 1;
-    string message = 2;  // For success/failure message
 }

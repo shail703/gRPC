@@ -1,7 +1,9 @@
-import os
 import grpc
 import lms_pb2
 import lms_pb2_grpc
+import os
+import json
+
 # Global variable to store the token after login
 token = ""
 
@@ -103,14 +105,70 @@ def submit_assignment(stub):
     else:
         print("Failed to retrieve assignments.")
 
+# def view_submitted_assignments(stub):
+#     # Fetch assignments and display them with index
+#     response = stub.Get(lms_pb2.GetRequest(token=token, type="view_assignments"))
+#     if response.status:
+#         print("\nYour Assignments:")
+#         assignments_data = response.data  # No need to parse with json.loads()
+
+#         # Split assignments into pending and submitted based on submission status
+#         pending_assignments = []
+#         submitted_assignments = []
+
+#         for assignment in assignments_data:
+#             submission_response = stub.Get(lms_pb2.GetRequest(token=token, type="view_submissions", optional_data=assignment))
+#             if submission_response.status:
+#                 submitted_assignments.append(assignment)
+#             else:
+#                 pending_assignments.append(assignment)
+
+#         # Show pending assignments
+#         print("\nPending Assignments:")
+#         if pending_assignments:
+#             for idx, assignment in enumerate(pending_assignments):
+#                 print(f"{idx + 1}. {assignment}")
+#         else:
+#             print("No pending assignments.")
+
+#         # Show submitted assignments
+#         print("\nSubmitted Assignments:")
+#         if submitted_assignments:
+#             for idx, assignment in enumerate(submitted_assignments):
+#                 print(f"{idx + 1}. {assignment}")
+#         else:
+#             print("No submitted assignments.")
+#     else:
+#         print("Failed to retrieve assignments.")
+
+
 def view_submitted_assignments(stub):
-    response = stub.Get(lms_pb2.GetRequest(token=token, type="view_assignments"))
+    response = stub.Get(lms_pb2.GetRequest(token=token, type="view_submitted_and_pending_assignments"))
+
     if response.status:
         print("\nYour Assignments:")
-        for idx, assignment in enumerate(response.data):
-            print(f"{idx + 1}. {assignment}")
+
+        pending_assignments = response.pending_assignments
+        submitted_assignments = response.submitted_assignments
+
+        print("Pending Assignments:")
+        if pending_assignments:
+            for assignment in pending_assignments:
+                print(f"- {assignment}")
+        else:
+            print("No pending assignments.")
+        
+        print("\nSubmitted Assignments:")
+        if submitted_assignments:
+            for assignment in submitted_assignments:
+                print(f"- {assignment}")
+        else:
+            print("No submitted assignments.")
+    
     else:
         print("Failed to retrieve assignments.")
+
+
 
 def view_grades(stub):
     assignment_id = input("Enter assignment ID to view grades: ")
@@ -129,7 +187,6 @@ def add_doubt(stub):
         print("Doubt added successfully!")
     else:
         print("Failed to add doubt.")
-
 
 
 def view_doubts(stub):
