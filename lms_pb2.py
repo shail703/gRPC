@@ -13,7 +13,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\tlms.proto\"5\n\x0fRegisterRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"3\n\x10RegisterResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\"2\n\x0cLoginRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"?\n\rLoginResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x12\r\n\x05token\x18\x02 \x01(\t\x12\x0f\n\x07message\x18\x03 \x01(\t\"\x1e\n\rLogoutRequest\x12\r\n\x05token\x18\x01 \x01(\t\"1\n\x0eLogoutResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\"@\n\nGetRequest\x12\r\n\x05token\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x15\n\roptional_data\x18\x03 \x01(\t\"<\n\x0bGetResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x12\x0c\n\x04\x64\x61ta\x18\x02 \x03(\t\x12\x0f\n\x07message\x18\x03 \x01(\t\"8\n\x0bPostRequest\x12\r\n\x05token\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x03 \x01(\t\"/\n\x0cPostResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t2\xd7\x01\n\x03LMS\x12\x36\n\x0fRegisterStudent\x12\x10.RegisterRequest\x1a\x11.RegisterResponse\x12&\n\x05Login\x12\r.LoginRequest\x1a\x0e.LoginResponse\x12)\n\x06Logout\x12\x0e.LogoutRequest\x1a\x0f.LogoutResponse\x12 \n\x03Get\x12\x0b.GetRequest\x1a\x0c.GetResponse\x12#\n\x04Post\x12\x0c.PostRequest\x1a\r.PostResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\tlms.proto\x12\x03lms\"5\n\x0fRegisterRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"3\n\x10RegisterResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\"2\n\x0cLoginRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"?\n\rLoginResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x12\r\n\x05token\x18\x02 \x01(\t\x12\x0f\n\x07message\x18\x03 \x01(\t\"@\n\nGetRequest\x12\r\n\x05token\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x15\n\roptional_data\x18\x03 \x01(\t\"x\n\x0bGetResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x12\x0c\n\x04\x64\x61ta\x18\x02 \x03(\t\x12\x1b\n\x13pending_assignments\x18\x03 \x03(\t\x12\x1d\n\x15submitted_assignments\x18\x04 \x03(\t\x12\x0f\n\x07message\x18\x05 \x01(\t\"8\n\x0bPostRequest\x12\r\n\x05token\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x03 \x01(\t\"/\n\x0cPostResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\"\x1e\n\rLogoutRequest\x12\r\n\x05token\x18\x01 \x01(\t\"1\n\x0eLogoutResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\"\x11\n\x0fGetUsersRequest\",\n\x10GetUsersResponse\x12\x18\n\x05users\x18\x01 \x03(\x0b\x32\t.lms.User\"&\n\x04User\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x0c\n\x04role\x18\x02 \x01(\t2\xb8\x02\n\x03LMS\x12>\n\x0fRegisterStudent\x12\x14.lms.RegisterRequest\x1a\x15.lms.RegisterResponse\x12.\n\x05Login\x12\x11.lms.LoginRequest\x1a\x12.lms.LoginResponse\x12(\n\x03Get\x12\x0f.lms.GetRequest\x1a\x10.lms.GetResponse\x12+\n\x04Post\x12\x10.lms.PostRequest\x1a\x11.lms.PostResponse\x12\x31\n\x06Logout\x12\x12.lms.LogoutRequest\x1a\x13.lms.LogoutResponse\x12\x37\n\x08GetUsers\x12\x14.lms.GetUsersRequest\x1a\x15.lms.GetUsersResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -21,26 +21,32 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'lms_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
-  _globals['_REGISTERREQUEST']._serialized_start=13
-  _globals['_REGISTERREQUEST']._serialized_end=66
-  _globals['_REGISTERRESPONSE']._serialized_start=68
-  _globals['_REGISTERRESPONSE']._serialized_end=119
-  _globals['_LOGINREQUEST']._serialized_start=121
-  _globals['_LOGINREQUEST']._serialized_end=171
-  _globals['_LOGINRESPONSE']._serialized_start=173
-  _globals['_LOGINRESPONSE']._serialized_end=236
-  _globals['_LOGOUTREQUEST']._serialized_start=238
-  _globals['_LOGOUTREQUEST']._serialized_end=268
-  _globals['_LOGOUTRESPONSE']._serialized_start=270
-  _globals['_LOGOUTRESPONSE']._serialized_end=319
-  _globals['_GETREQUEST']._serialized_start=321
-  _globals['_GETREQUEST']._serialized_end=385
-  _globals['_GETRESPONSE']._serialized_start=387
-  _globals['_GETRESPONSE']._serialized_end=447
-  _globals['_POSTREQUEST']._serialized_start=449
-  _globals['_POSTREQUEST']._serialized_end=505
-  _globals['_POSTRESPONSE']._serialized_start=507
-  _globals['_POSTRESPONSE']._serialized_end=554
-  _globals['_LMS']._serialized_start=557
-  _globals['_LMS']._serialized_end=772
+  _globals['_REGISTERREQUEST']._serialized_start=18
+  _globals['_REGISTERREQUEST']._serialized_end=71
+  _globals['_REGISTERRESPONSE']._serialized_start=73
+  _globals['_REGISTERRESPONSE']._serialized_end=124
+  _globals['_LOGINREQUEST']._serialized_start=126
+  _globals['_LOGINREQUEST']._serialized_end=176
+  _globals['_LOGINRESPONSE']._serialized_start=178
+  _globals['_LOGINRESPONSE']._serialized_end=241
+  _globals['_GETREQUEST']._serialized_start=243
+  _globals['_GETREQUEST']._serialized_end=307
+  _globals['_GETRESPONSE']._serialized_start=309
+  _globals['_GETRESPONSE']._serialized_end=429
+  _globals['_POSTREQUEST']._serialized_start=431
+  _globals['_POSTREQUEST']._serialized_end=487
+  _globals['_POSTRESPONSE']._serialized_start=489
+  _globals['_POSTRESPONSE']._serialized_end=536
+  _globals['_LOGOUTREQUEST']._serialized_start=538
+  _globals['_LOGOUTREQUEST']._serialized_end=568
+  _globals['_LOGOUTRESPONSE']._serialized_start=570
+  _globals['_LOGOUTRESPONSE']._serialized_end=619
+  _globals['_GETUSERSREQUEST']._serialized_start=621
+  _globals['_GETUSERSREQUEST']._serialized_end=638
+  _globals['_GETUSERSRESPONSE']._serialized_start=640
+  _globals['_GETUSERSRESPONSE']._serialized_end=684
+  _globals['_USER']._serialized_start=686
+  _globals['_USER']._serialized_end=724
+  _globals['_LMS']._serialized_start=727
+  _globals['_LMS']._serialized_end=1039
 # @@protoc_insertion_point(module_scope)

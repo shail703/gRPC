@@ -47,6 +47,12 @@ class LMSServicer(lms_pb2_grpc.LMSServicer):
             token = f"{request.username}_token"
             return lms_pb2.LoginResponse(status=True, token=token)
         return lms_pb2.LoginResponse(status=False, message="Invalid credentials")
+    
+    def GetUsers(self, request, context):
+        user_list = []
+        for username, details in users.items():
+            user_list.append({"username": username, "role": details["role"]})
+        return lms_pb2.GetUsersResponse(users=user_list)
 
     def Get(self, request, context):
 
@@ -56,21 +62,28 @@ class LMSServicer(lms_pb2_grpc.LMSServicer):
         if request.type == "view_assignments":
             # Show assignments that the student hasn't submitted yet
             pending_assignments = []
+            all_assignments=[]
             for assignment_id in assignments:
+                all_assignments.append(assignment_id)
                 if assignment_id not in submissions or \
                         not any(sub['student'] == student for sub in submissions[assignment_id]):
                     pending_assignments.append(assignment_id)
-            return lms_pb2.GetResponse(status=True, data=pending_assignments)
+            
+            return lms_pb2.GetResponse(status=True, data=all_assignments)
 
         elif request.type == "view_submissions":
             assignment_id = request.optional_data
             if assignment_id in submissions:
-                # Only show the student's submissions
-                student_submissions = [f"{i}: {sub['student']} - {sub['file']}" 
-                                       for i, sub in enumerate(submissions[assignment_id]) 
-                                       if sub['student'] == student]
-                return lms_pb2.GetResponse(status=True, data=student_submissions)
-            return lms_pb2.GetResponse(status=False)
+                # Only show the submissions for this assignment
+                assignment_submissions = submissions[assignment_id]
+                # Prepare a list to return submission details
+                submission_list = [
+                    f"Student: {sub['student']}, File: {sub['file']}" 
+                    for sub in assignment_submissions
+                ]
+                return lms_pb2.GetResponse(status=True, data=submission_list)
+            else:
+                return lms_pb2.GetResponse(status=False, message="No submissions found for the assignment.")
 
         elif request.type == "view_submitted_and_pending_assignments":
             pending_assignments = []
@@ -101,14 +114,15 @@ class LMSServicer(lms_pb2_grpc.LMSServicer):
             )
         
         elif request.type == "view_grades":
-            # View student's grades
+            # View student's grades along with assignment names
             student_grades = []
-            for assignment_submissions in submissions.values():
+            for assignment_id, assignment_submissions in submissions.items():
                 for sub in assignment_submissions:
                     if sub.get('student') == student and 'grade' in sub:
-                        student_grades.append(sub['grade'])
+                        # Include the assignment name with the grade
+                        student_grades.append(f"Assignment: {assignment_id}, Grade: {sub['grade']}")
             return lms_pb2.GetResponse(status=True, data=student_grades)
-
+        
         elif request.type == "view_doubts":
             if request.optional_data == "unanswered":
                 indexed_doubts = [f"{i}: {doubt}" for i, doubt in enumerate(doubts.get("unanswered", []))]
@@ -122,7 +136,8 @@ class LMSServicer(lms_pb2_grpc.LMSServicer):
 
     def Post(self, request, context):
         if request.type == "add_assignment":
-            assignments[request.data] = []
+            assignment_id, assignment_name = request.data.split(",", 1)
+            assignments[assignment_id] = {"name": assignment_name}
             save_data(ASSIGNMENT_FILE, assignments)
             return lms_pb2.PostResponse(status=True)
 
@@ -133,8 +148,18 @@ class LMSServicer(lms_pb2_grpc.LMSServicer):
             return lms_pb2.PostResponse(status=True)
 
         elif request.type == "grade":
-            assignment_id, student_index, grade = request.data.split(",")
-            submissions[assignment_id][int(student_index)]["grade"] = grade
+            assignment_id, student_username, grade = request.data.split(",")
+            # Handle the case where the grade is "Fail" and there is no existing submission
+            if grade.lower() == "fail" and student_username not in [sub['student'] for sub in submissions.get(assignment_id, [])]:
+                # Add a failed submission entry with path set to None
+                if assignment_id not in submissions:
+                    submissions[assignment_id] = []
+                submissions[assignment_id].append({"student": student_username, "file": None, "grade": "Fail"})
+            else:
+                # Update existing submission with the grade
+                for submission in submissions.get(assignment_id, []):
+                    if submission['student'] == student_username:
+                        submission["grade"] = grade
             save_data(SUBMISSION_FILE, submissions)
             return lms_pb2.PostResponse(status=True)
 

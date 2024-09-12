@@ -1,0 +1,99 @@
+syntax = "proto3";
+
+package lms;
+
+// The LMS service definition
+service LMS {
+    // Register a new student
+    rpc RegisterStudent (RegisterRequest) returns (RegisterResponse);
+    
+    // Login for both students and teachers
+    rpc Login (LoginRequest) returns (LoginResponse);
+    
+    // Generic GET request to retrieve various data like assignments, submissions, grades, etc.
+    rpc Get (GetRequest) returns (GetResponse);
+
+    // Generic POST request to submit assignments, add doubts, grade, etc.
+    rpc Post (PostRequest) returns (PostResponse);
+
+    // Logout from the system
+    rpc Logout (LogoutRequest) returns (LogoutResponse);
+
+    rpc GetUsers(GetUsersRequest) returns (GetUsersResponse);
+}
+
+// Request message for registering a new student
+message RegisterRequest {
+    string username = 1;
+    string password = 2;
+}
+
+// Response message for registering a new student
+message RegisterResponse {
+    bool status = 1;
+    string message = 2;
+}
+
+// Request message for logging in
+message LoginRequest {
+    string username = 1;
+    string password = 2;
+}
+
+// Response message for logging in
+message LoginResponse {
+    bool status = 1;
+    string token = 2;
+    string message = 3;
+}
+
+// Request message for retrieving data
+message GetRequest {
+    string token = 1;        // Authentication token
+    string type = 2;         // Type of data (e.g., "view_assignments", "view_grades")
+    string optional_data = 3; // Optional data for additional filtering (e.g., assignment ID)
+}
+
+// Response message for retrieving data
+message GetResponse {
+    bool status = 1;                         // Status of the operation
+    repeated string data = 2;                // General data field for lists like assignments, grades, etc.
+    repeated string pending_assignments = 3; // Pending assignments for the student
+    repeated string submitted_assignments = 4; // Submitted assignments for the student
+    string message = 5;                      // Optional message (used for responses with pending and submitted assignments)
+}
+
+// Request message for submitting data (POST)
+message PostRequest {
+    string token = 1;      // Authentication token
+    string type = 2;       // Type of operation (e.g., "add_assignment", "submit_assignment")
+    string data = 3;       // Data to be posted (e.g., assignment details, file path, doubt, etc.)
+}
+
+// Response message for submitting data (POST)
+message PostResponse {
+    bool status = 1;
+    string message = 2;
+}
+
+// Request message for logging out
+message LogoutRequest {
+    string token = 1;
+}
+
+// Response message for logging out
+message LogoutResponse {
+    bool status = 1;
+    string message = 2;
+}
+
+message GetUsersRequest {}
+
+message GetUsersResponse {
+    repeated User users = 1;
+}
+
+message User {
+    string username = 1;
+    string role = 2;
+}

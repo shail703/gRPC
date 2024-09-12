@@ -6,7 +6,8 @@ import lms_pb2 as lms__pb2
 
 
 class LMSStub(object):
-    """Missing associated documentation comment in .proto file."""
+    """The LMS service definition
+    """
 
     def __init__(self, channel):
         """Constructor.
@@ -15,64 +16,78 @@ class LMSStub(object):
             channel: A grpc.Channel.
         """
         self.RegisterStudent = channel.unary_unary(
-                '/LMS/RegisterStudent',
+                '/lms.LMS/RegisterStudent',
                 request_serializer=lms__pb2.RegisterRequest.SerializeToString,
                 response_deserializer=lms__pb2.RegisterResponse.FromString,
                 )
         self.Login = channel.unary_unary(
-                '/LMS/Login',
+                '/lms.LMS/Login',
                 request_serializer=lms__pb2.LoginRequest.SerializeToString,
                 response_deserializer=lms__pb2.LoginResponse.FromString,
                 )
-        self.Logout = channel.unary_unary(
-                '/LMS/Logout',
-                request_serializer=lms__pb2.LogoutRequest.SerializeToString,
-                response_deserializer=lms__pb2.LogoutResponse.FromString,
-                )
         self.Get = channel.unary_unary(
-                '/LMS/Get',
+                '/lms.LMS/Get',
                 request_serializer=lms__pb2.GetRequest.SerializeToString,
                 response_deserializer=lms__pb2.GetResponse.FromString,
                 )
         self.Post = channel.unary_unary(
-                '/LMS/Post',
+                '/lms.LMS/Post',
                 request_serializer=lms__pb2.PostRequest.SerializeToString,
                 response_deserializer=lms__pb2.PostResponse.FromString,
+                )
+        self.Logout = channel.unary_unary(
+                '/lms.LMS/Logout',
+                request_serializer=lms__pb2.LogoutRequest.SerializeToString,
+                response_deserializer=lms__pb2.LogoutResponse.FromString,
+                )
+        self.GetUsers = channel.unary_unary(
+                '/lms.LMS/GetUsers',
+                request_serializer=lms__pb2.GetUsersRequest.SerializeToString,
+                response_deserializer=lms__pb2.GetUsersResponse.FromString,
                 )
 
 
 class LMSServicer(object):
-    """Missing associated documentation comment in .proto file."""
+    """The LMS service definition
+    """
 
     def RegisterStudent(self, request, context):
-        """Authentication
+        """Register a new student
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def Login(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def Logout(self, request, context):
-        """Missing associated documentation comment in .proto file."""
+        """Login for both students and teachers
+        """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def Get(self, request, context):
-        """Get Requests
+        """Generic GET request to retrieve various data like assignments, submissions, grades, etc.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def Post(self, request, context):
-        """Post Requests
+        """Generic POST request to submit assignments, add doubts, grade, etc.
         """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def Logout(self, request, context):
+        """Logout from the system
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetUsers(self, request, context):
+        """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -90,11 +105,6 @@ def add_LMSServicer_to_server(servicer, server):
                     request_deserializer=lms__pb2.LoginRequest.FromString,
                     response_serializer=lms__pb2.LoginResponse.SerializeToString,
             ),
-            'Logout': grpc.unary_unary_rpc_method_handler(
-                    servicer.Logout,
-                    request_deserializer=lms__pb2.LogoutRequest.FromString,
-                    response_serializer=lms__pb2.LogoutResponse.SerializeToString,
-            ),
             'Get': grpc.unary_unary_rpc_method_handler(
                     servicer.Get,
                     request_deserializer=lms__pb2.GetRequest.FromString,
@@ -105,15 +115,26 @@ def add_LMSServicer_to_server(servicer, server):
                     request_deserializer=lms__pb2.PostRequest.FromString,
                     response_serializer=lms__pb2.PostResponse.SerializeToString,
             ),
+            'Logout': grpc.unary_unary_rpc_method_handler(
+                    servicer.Logout,
+                    request_deserializer=lms__pb2.LogoutRequest.FromString,
+                    response_serializer=lms__pb2.LogoutResponse.SerializeToString,
+            ),
+            'GetUsers': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetUsers,
+                    request_deserializer=lms__pb2.GetUsersRequest.FromString,
+                    response_serializer=lms__pb2.GetUsersResponse.SerializeToString,
+            ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'LMS', rpc_method_handlers)
+            'lms.LMS', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
  # This class is part of an EXPERIMENTAL API.
 class LMS(object):
-    """Missing associated documentation comment in .proto file."""
+    """The LMS service definition
+    """
 
     @staticmethod
     def RegisterStudent(request,
@@ -126,7 +147,7 @@ class LMS(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/LMS/RegisterStudent',
+        return grpc.experimental.unary_unary(request, target, '/lms.LMS/RegisterStudent',
             lms__pb2.RegisterRequest.SerializeToString,
             lms__pb2.RegisterResponse.FromString,
             options, channel_credentials,
@@ -143,26 +164,9 @@ class LMS(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/LMS/Login',
+        return grpc.experimental.unary_unary(request, target, '/lms.LMS/Login',
             lms__pb2.LoginRequest.SerializeToString,
             lms__pb2.LoginResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def Logout(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/LMS/Logout',
-            lms__pb2.LogoutRequest.SerializeToString,
-            lms__pb2.LogoutResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -177,7 +181,7 @@ class LMS(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/LMS/Get',
+        return grpc.experimental.unary_unary(request, target, '/lms.LMS/Get',
             lms__pb2.GetRequest.SerializeToString,
             lms__pb2.GetResponse.FromString,
             options, channel_credentials,
@@ -194,8 +198,42 @@ class LMS(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/LMS/Post',
+        return grpc.experimental.unary_unary(request, target, '/lms.LMS/Post',
             lms__pb2.PostRequest.SerializeToString,
             lms__pb2.PostResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def Logout(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/lms.LMS/Logout',
+            lms__pb2.LogoutRequest.SerializeToString,
+            lms__pb2.LogoutResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def GetUsers(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/lms.LMS/GetUsers',
+            lms__pb2.GetUsersRequest.SerializeToString,
+            lms__pb2.GetUsersResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
