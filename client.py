@@ -72,6 +72,28 @@ def add_assignment(stub):
         print("Assignment added successfully.")
     else:
         print("Failed to add assignment.")
+        
+def view_submissions(stub):
+    # View assignments with indexes for selection
+    response = stub.Get(lms_pb2.GetRequest(token=token, type="view_assignments"))
+    if response.status:
+        print("\nAvailable Assignments:")
+        for idx, assignment in enumerate(response.data):
+            print(f"{idx + 1}. {assignment}")
+        assignment_index = int(input("Enter the assignment index: ")) - 1
+        assignment_id = response.data[assignment_index]  # Get the actual assignment ID
+
+        # Fetch submissions for the selected assignment
+        response = stub.Get(lms_pb2.GetRequest(token=token, type="view_submissions", optional_data=assignment_id))
+        if response.status:
+            print("\nSubmissions:")
+            for idx, submission in enumerate(response.data):
+                print(f"{idx + 1}. {submission}")
+        else:
+            print("Failed to retrieve submissions.")
+    else:
+        print("Failed to retrieve assignments.")
+
 
 def view_assignments(stub):
     response = stub.Get(lms_pb2.GetRequest(token=token, type="view_assignments"))
