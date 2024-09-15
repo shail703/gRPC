@@ -2,3 +2,7 @@ __pycache__/
 *.pyc
 .env
 /.venv
+submissions.json
+assignments.json
+doubts.json
+users.json

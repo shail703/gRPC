@@ -13,7 +13,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\tlms.proto\x12\x03lms\"5\n\x0fRegisterRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"3\n\x10RegisterResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\"2\n\x0cLoginRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"?\n\rLoginResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x12\r\n\x05token\x18\x02 \x01(\t\x12\x0f\n\x07message\x18\x03 \x01(\t\"@\n\nGetRequest\x12\r\n\x05token\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x15\n\roptional_data\x18\x03 \x01(\t\"x\n\x0bGetResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x12\x0c\n\x04\x64\x61ta\x18\x02 \x03(\t\x12\x1b\n\x13pending_assignments\x18\x03 \x03(\t\x12\x1d\n\x15submitted_assignments\x18\x04 \x03(\t\x12\x0f\n\x07message\x18\x05 \x01(\t\"8\n\x0bPostRequest\x12\r\n\x05token\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x03 \x01(\t\"/\n\x0cPostResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\"\x1e\n\rLogoutRequest\x12\r\n\x05token\x18\x01 \x01(\t\"1\n\x0eLogoutResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\"\x11\n\x0fGetUsersRequest\",\n\x10GetUsersResponse\x12\x18\n\x05users\x18\x01 \x03(\x0b\x32\t.lms.User\"&\n\x04User\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x0c\n\x04role\x18\x02 \x01(\t2\xb8\x02\n\x03LMS\x12>\n\x0fRegisterStudent\x12\x14.lms.RegisterRequest\x1a\x15.lms.RegisterResponse\x12.\n\x05Login\x12\x11.lms.LoginRequest\x1a\x12.lms.LoginResponse\x12(\n\x03Get\x12\x0f.lms.GetRequest\x1a\x10.lms.GetResponse\x12+\n\x04Post\x12\x10.lms.PostRequest\x1a\x11.lms.PostResponse\x12\x31\n\x06Logout\x12\x12.lms.LogoutRequest\x1a\x13.lms.LogoutResponse\x12\x37\n\x08GetUsers\x12\x14.lms.GetUsersRequest\x1a\x15.lms.GetUsersResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\tlms.proto\x12\x03lms\"5\n\x0fRegisterRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"3\n\x10RegisterResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\"2\n\x0cLoginRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"?\n\rLoginResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x12\r\n\x05token\x18\x02 \x01(\t\x12\x0f\n\x07message\x18\x03 \x01(\t\"@\n\nGetRequest\x12\r\n\x05token\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x15\n\roptional_data\x18\x03 \x01(\t\"x\n\x0bGetResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x12\x0c\n\x04\x64\x61ta\x18\x02 \x03(\t\x12\x1b\n\x13pending_assignments\x18\x03 \x03(\t\x12\x1d\n\x15submitted_assignments\x18\x04 \x03(\t\x12\x0f\n\x07message\x18\x05 \x01(\t\"8\n\x0bPostRequest\x12\r\n\x05token\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x03 \x01(\t\"/\n\x0cPostResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\"\x1e\n\rLogoutRequest\x12\r\n\x05token\x18\x01 \x01(\t\"1\n\x0eLogoutResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\"\x11\n\x0fGetUsersRequest\",\n\x10GetUsersResponse\x12\x18\n\x05users\x18\x01 \x03(\x0b\x32\t.lms.User\"&\n\x04User\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x0c\n\x04role\x18\x02 \x01(\t\"k\n\x11UploadFileRequest\x12\x17\n\x0f\x61ssignment_name\x18\x01 \x01(\t\x12\x14\n\x0cstudent_name\x18\x02 \x01(\t\x12\x14\n\x0c\x66ile_content\x18\x03 \x01(\x0c\x12\x11\n\tfile_name\x18\x04 \x01(\t\"5\n\x12UploadFileResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\"D\n\x13\x44ownloadFileRequest\x12\x17\n\x0f\x61ssignment_name\x18\x01 \x01(\t\x12\x14\n\x0cstudent_name\x18\x02 \x01(\t\"`\n\x14\x44ownloadFileResponse\x12\x0e\n\x06status\x18\x01 \x01(\x08\x12\x14\n\x0c\x66ile_content\x18\x02 \x01(\x0c\x12\x11\n\tfile_name\x18\x03 \x01(\t\x12\x0f\n\x07message\x18\x04 \x01(\t\"C\n\x11\x41ssignmentRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x14\n\x0c\x66ile_content\x18\x03 \x01(\x0c\"5\n\x12\x41ssignmentResponse\x12\x0e\n\x06status\x18\x01 \x01(\t\x12\x0f\n\x07message\x18\x02 \x01(\t\"+\n\x0f\x41ssignmentQuery\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\"@\n\x11\x41ssignmentDetails\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x11\n\tfile_path\x18\x03 \x01(\t\"-\n\x15ViewSubmissionRequest\x12\x14\n\x0cstudent_name\x18\x01 \x01(\t\"e\n\x16ViewSubmissionResponse\x12$\n\x0b\x61ssignments\x18\x01 \x03(\x0b\x32\x0f.lms.Assignment\x12\x10\n\x08\x66ile_url\x18\x02 \x01(\t\x12\x13\n\x0b\x66ile_exists\x18\x03 \x01(\x08\"c\n\nAssignment\x12\x15\n\rassignment_id\x18\x01 \x01(\t\x12\x17\n\x0f\x61ssignment_name\x18\x02 \x01(\t\x12\x13\n\x0b\x66ile_status\x18\x03 \x01(\t\x12\x10\n\x08\x66ile_url\x18\x04 \x01(\t\"\x16\n\x14ViewQuestionsRequest\"V\n\x12\x41ssignmentQuestion\x12\x15\n\rassignment_id\x18\x01 \x01(\t\x12\x17\n\x0f\x61ssignment_name\x18\x02 \x01(\t\x12\x10\n\x08\x66ile_url\x18\x03 \x01(\t\"C\n\x15ViewQuestionsResponse\x12*\n\tquestions\x18\x01 \x03(\x0b\x32\x17.lms.AssignmentQuestion2\xd3\x05\n\x03LMS\x12>\n\x0fRegisterStudent\x12\x14.lms.RegisterRequest\x1a\x15.lms.RegisterResponse\x12.\n\x05Login\x12\x11.lms.LoginRequest\x1a\x12.lms.LoginResponse\x12(\n\x03Get\x12\x0f.lms.GetRequest\x1a\x10.lms.GetResponse\x12+\n\x04Post\x12\x10.lms.PostRequest\x1a\x11.lms.PostResponse\x12\x31\n\x06Logout\x12\x12.lms.LogoutRequest\x1a\x13.lms.LogoutResponse\x12\x37\n\x08GetUsers\x12\x14.lms.GetUsersRequest\x1a\x15.lms.GetUsersResponse\x12=\n\nUploadFile\x12\x16.lms.UploadFileRequest\x1a\x17.lms.UploadFileResponse\x12\x43\n\x0c\x44ownloadFile\x12\x18.lms.DownloadFileRequest\x1a\x19.lms.DownloadFileResponse\x12\x43\n\x10\x43reateAssignment\x12\x16.lms.AssignmentRequest\x1a\x17.lms.AssignmentResponse\x12=\n\rGetAssignment\x12\x14.lms.AssignmentQuery\x1a\x16.lms.AssignmentDetails\x12I\n\x0eViewSubmission\x12\x1a.lms.ViewSubmissionRequest\x1a\x1b.lms.ViewSubmissionResponse\x12\x46\n\rViewQuestions\x12\x19.lms.ViewQuestionsRequest\x1a\x1a.lms.ViewQuestionsResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -47,6 +47,34 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _globals['_GETUSERSRESPONSE']._serialized_end=684
   _globals['_USER']._serialized_start=686
   _globals['_USER']._serialized_end=724
-  _globals['_LMS']._serialized_start=727
-  _globals['_LMS']._serialized_end=1039
+  _globals['_UPLOADFILEREQUEST']._serialized_start=726
+  _globals['_UPLOADFILEREQUEST']._serialized_end=833
+  _globals['_UPLOADFILERESPONSE']._serialized_start=835
+  _globals['_UPLOADFILERESPONSE']._serialized_end=888
+  _globals['_DOWNLOADFILEREQUEST']._serialized_start=890
+  _globals['_DOWNLOADFILEREQUEST']._serialized_end=958
+  _globals['_DOWNLOADFILERESPONSE']._serialized_start=960
+  _globals['_DOWNLOADFILERESPONSE']._serialized_end=1056
+  _globals['_ASSIGNMENTREQUEST']._serialized_start=1058
+  _globals['_ASSIGNMENTREQUEST']._serialized_end=1125
+  _globals['_ASSIGNMENTRESPONSE']._serialized_start=1127
+  _globals['_ASSIGNMENTRESPONSE']._serialized_end=1180
+  _globals['_ASSIGNMENTQUERY']._serialized_start=1182
+  _globals['_ASSIGNMENTQUERY']._serialized_end=1225
+  _globals['_ASSIGNMENTDETAILS']._serialized_start=1227
+  _globals['_ASSIGNMENTDETAILS']._serialized_end=1291
+  _globals['_VIEWSUBMISSIONREQUEST']._serialized_start=1293
+  _globals['_VIEWSUBMISSIONREQUEST']._serialized_end=1338
+  _globals['_VIEWSUBMISSIONRESPONSE']._serialized_start=1340
+  _globals['_VIEWSUBMISSIONRESPONSE']._serialized_end=1441
+  _globals['_ASSIGNMENT']._serialized_start=1443
+  _globals['_ASSIGNMENT']._serialized_end=1542
+  _globals['_VIEWQUESTIONSREQUEST']._serialized_start=1544
+  _globals['_VIEWQUESTIONSREQUEST']._serialized_end=1566
+  _globals['_ASSIGNMENTQUESTION']._serialized_start=1568
+  _globals['_ASSIGNMENTQUESTION']._serialized_end=1654
+  _globals['_VIEWQUESTIONSRESPONSE']._serialized_start=1656
+  _globals['_VIEWQUESTIONSRESPONSE']._serialized_end=1723
+  _globals['_LMS']._serialized_start=1726
+  _globals['_LMS']._serialized_end=2449
 # @@protoc_insertion_point(module_scope)

@@ -3,6 +3,7 @@ import lms_pb2
 import lms_pb2_grpc
 import os
 import json
+import webbrowser
 
 # Global variable to store the token after login
 token = ""
@@ -13,25 +14,28 @@ def student_menu(stub):
         print("1. View Assignments")
         print("2. Submit Assignment")
         print("3. View Submitted and Pending Assignments")
-        print("4. View Grades")
-        print("5. Add Doubt")
-        print("6. View Doubts")
-        print("7. Logout")
+        print("4. View uploaded Assignments")
+        print("5. View Grades")
+        print("6. Add Doubt")
+        print("7. View Doubts")
+        print("8. Logout")
         choice = input("Enter your choice: ")
 
         if choice == '1':
-            view_assignments(stub)
+            view_assignment(stub)
         elif choice == '2':
             submit_assignment(stub)
         elif choice == '3':
             view_submitted_assignments(stub)
         elif choice == '4':
-            view_grades(stub)
+            view_submission(stub)
         elif choice == '5':
-            add_doubt(stub)
+            view_grades(stub)
         elif choice == '6':
-            view_doubts(stub)
+            add_doubt(stub)
         elif choice == '7':
+            view_doubts(stub)
+        elif choice == '8':
             logout(stub)
             break
         else:
@@ -41,7 +45,7 @@ def teacher_menu(stub):
     while True:
         print("\n--- Teacher Menu ---")
         print("1. Add Assignment")
-        print("2. View Submissions")
+        print("2. View Uploaded Assignment")
         print("3. Grade Assignment")
         print("4. View Doubts")
         print("5. Answer Doubts")
@@ -51,7 +55,7 @@ def teacher_menu(stub):
         if choice == '1':
             add_assignment(stub)
         elif choice == '2':
-            view_submissions(stub)
+            view_uploaded_questions(stub)
         elif choice == '3':
             grade_assignment(stub)
         elif choice == '4':
@@ -65,29 +69,80 @@ def teacher_menu(stub):
             print("Invalid choice. Please try again.")
 
 def add_assignment(stub):
-    assignment_id = input("Enter Assignment ID: ")
-    assignment_name = input("Enter Assignment Name: ")
+    assignment_id = input("Enter assignment ID: ")
+    assignment_name = input("Enter assignment Name: ")
     response = stub.Post(lms_pb2.PostRequest(type="add_assignment", data=f"{assignment_id},{assignment_name}"))
     if response.status:
-        print("Assignment added successfully.")
+        print("Assignment created successfully!")
     else:
-        print("Failed to add assignment.")
+        print("Failed to create assignment.")
+    file_path = input("Enter the file path to upload: ")
 
-def view_assignments(stub):
+    # Read the file content
+    with open(file_path, 'rb') as f:
+        file_content = f.read()
+    
+    # Create assignment request
+    request = lms_pb2.AssignmentRequest(
+        id=assignment_id,
+        name=assignment_name,
+        file_content=file_content
+    )
+    
+    # Call CreateAssignment RPC
+    response = stub.CreateAssignment(request)
+    # Handle the response status and message
+    if response.status == "success":
+        print(f"Success: {response.message}")
+    else:
+        print(f"Error: {response.message}")
+
+
+def view_assignment(stub):
     response = stub.Get(lms_pb2.GetRequest(token=token, type="view_assignments"))
     if response.status:
         print("Assignments: ", response.data)
     else:
         print("Failed to retrieve assignments.")
+    assignment_id = input("Enter assignment ID: ")
+    assignment_name = input("Enter assignment Name: ")
+    
+    # Create GetAssignment request
+    request = lms_pb2.AssignmentQuery(
+        id=assignment_id,
+        name=assignment_name
+    )
+    
+    # Call GetAssignment RPC
+    response = stub.GetAssignment(request)
+    print(f"Assignment ID: {response.id}")
+    print(f"Assignment Name: {response.name}")
+    print(f"Download file here: {response.file_path}")
+
 
 def submit_assignment(stub):
     assignment_id = input("Enter Assignment ID: ")
     file_path = input("Enter file path: ")
-    response = stub.Post(lms_pb2.PostRequest(type="submit_assignment", data=f"{assignment_id},{file_path}", token=token))
+    
+    # Read file content
+    with open(file_path, 'rb') as file:
+        file_content = file.read()
+    
+    file_name = os.path.basename(file_path)
+    student_name = token.split('_')[0]  # Assuming token is formatted as "{username}_token"
+
+    # Send file to server
+    response = stub.UploadFile(lms_pb2.UploadFileRequest(
+        assignment_name=assignment_id,
+        student_name=student_name,
+        file_content=file_content,
+        file_name=file_name
+    ))
+    
     if response.status:
         print("Assignment submitted successfully.")
     else:
-        print("Failed to submit assignment.")
+        print("Failed to submit assignment:", response.message)
 
 def view_submitted_assignments(stub):
     response = stub.Get(lms_pb2.GetRequest(token=token, type="view_submitted_and_pending_assignments"))
@@ -105,6 +160,30 @@ def view_grades(stub):
             print(grade_info)  # This will print assignment names with grades
     else:
         print("Failed to retrieve grades.")
+def view_submission(stub):
+    # Request the student's name
+    student_name = User
+    print(f"Logged in as: {User}")
+
+    # Requesting the list of assignment submissions
+    response = stub.ViewSubmission(lms_pb2.ViewSubmissionRequest(student_name=student_name))
+
+    if not response.assignments:
+        print("No assignments found.")
+        return
+
+    # Display the assignments with their status
+    print("\nYour Assignment Submissions:")
+    for assignment in response.assignments:
+        print(f"ID: {assignment.assignment_id}, Status: {assignment.file_status}")
+        if assignment.file_status == "Uploaded":
+            # Print the clickable link to the assignment file
+            if assignment.file_url:
+                print(f"Assignment File URL: {assignment.file_url}")
+            else:
+                print("No file URL available.")
+        else:
+            print("The file has not been uploaded yet.")
 
 
 def add_doubt(stub):
@@ -175,6 +254,47 @@ def grade_assignment(stub):
     else:
         print("Failed to retrieve assignments.")
 
+def submit_assignment(stub):
+    assignment_id = input("Enter Assignment ID: ")
+    file_path = input("Enter file path: ")
+    
+    # Read file content
+    with open(file_path, 'rb') as file:
+        file_content = file.read()
+    
+    file_name = os.path.basename(file_path)
+    student_name = token.split('_')[0]  # Assuming token is formatted as "{username}_token"
+
+    # Send file to server
+    response = stub.UploadFile(lms_pb2.UploadFileRequest(
+        assignment_name=assignment_id,
+        student_name=student_name,
+        file_content=file_content,
+        file_name=file_name
+    ))
+    
+    if response.status:
+        print("Assignment submitted successfully.")
+    else:
+        print("Failed to submit assignment:", response.message)
+        
+def view_uploaded_questions(stub):
+    # Requesting the list of uploaded assignment questions
+    response = stub.ViewQuestions(lms_pb2.ViewQuestionsRequest())
+
+    if not response.questions:
+        print("No assignment questions found.")
+        return
+
+    # Display the assignment questions with their details
+    print("\nUploaded Assignment Questions:")
+    for question in response.questions:
+        print(f"ID: {question.assignment_id}, Name: {question.assignment_name}")
+        if question.file_url:
+            normalized_url=question.file_url.replace('\\','/')
+            print(f"File URL: {normalized_url}")
+        else:
+            print("No file URL available.")
 def logout(stub):
     response = stub.Logout(lms_pb2.LogoutRequest(token=token))
     if response.status:
@@ -195,7 +315,7 @@ def main():
             if choice == '1':
                 username = input("Enter username: ")
                 password = input("Enter password: ")
-                role = input("Enter role (student/teacher): ")
+                role = 'student'
                 response = stub.RegisterStudent(lms_pb2.RegisterRequest(username=username, password=password))
                 if response.status:
                     print("Registration successful.")
@@ -207,6 +327,8 @@ def main():
                 response = stub.Login(lms_pb2.LoginRequest(username=username, password=password))
                 if response.status:
                     global token
+                    global User
+                    User=username
                     token = response.token
                     if username == "teacher":
                         teacher_menu(stub)
