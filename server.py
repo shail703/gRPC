@@ -4,12 +4,13 @@ import lms_pb2
 import lms_pb2_grpc
 import json
 import os
-
 # File paths for storing users, assignments, submissions, and doubts
 USER_FILE = 'users.json'
 ASSIGNMENT_FILE = 'assignments.json'
 SUBMISSION_FILE = 'submissions.json'
 DOUBT_FILE = 'doubts.json'
+ASSIGNMENT_FOLDER = 'assignments'  # Folder to store assignment submissions
+QUESTIONS_FOLDER = os.path.join(ASSIGNMENT_FOLDER, 'questions')
 
 # Load data from JSON files
 def load_data(file_path):
@@ -28,6 +29,13 @@ users = load_data(USER_FILE)
 assignments = load_data(ASSIGNMENT_FILE)
 submissions = load_data(SUBMISSION_FILE)
 doubts = load_data(DOUBT_FILE)
+
+# Create assignments directory if it doesn't exist
+if not os.path.exists(ASSIGNMENT_FOLDER):
+    os.makedirs(ASSIGNMENT_FOLDER)
+# Ensure folder structure exists
+if not os.path.exists(QUESTIONS_FOLDER):
+    os.makedirs(QUESTIONS_FOLDER)
 
 # Hardcoded teacher account
 if "teacher" not in users:
@@ -53,7 +61,139 @@ class LMSServicer(lms_pb2_grpc.LMSServicer):
         for username, details in users.items():
             user_list.append({"username": username, "role": details["role"]})
         return lms_pb2.GetUsersResponse(users=user_list)
+    
+    def ViewQuestions(self, request, context):
+        questions = []
 
+        # Define paths
+        questions_folder = os.path.join(ASSIGNMENT_FOLDER, "questions")
+
+        # Read assignments information from JSON file
+        with open(ASSIGNMENT_FILE, 'r') as file:
+            assignments_info = json.load(file)
+
+        if not os.path.exists(questions_folder):
+            error_msg = f"Questions folder does not exist: {questions_folder}"
+            print(error_msg)
+            context.set_details(error_msg)
+            context.set_code(grpc.StatusCode.UNKNOWN)
+            return lms_pb2.ViewQuestionsResponse(questions=[])
+
+        for assignment_id, info in assignments_info.items():
+            assignment_name = info["name"]
+            # Construct the file path for the PDF
+            pdf_file_path = os.path.join(questions_folder, f"{assignment_name}.pdf")
+
+            if os.path.isfile(pdf_file_path):
+                file_url = f"file://{pdf_file_path}"
+                questions.append(lms_pb2.AssignmentQuestion(
+                    assignment_id=assignment_id,
+                    assignment_name=assignment_name,
+                    file_url=file_url
+                ))
+
+        return lms_pb2.ViewQuestionsResponse(questions=questions)
+    def UploadFile(self, request, context):
+        assignment_name = request.assignment_name
+        student_name = request.student_name
+        file_content = request.file_content
+        file_name = request.file_name
+
+        # Create assignment folder
+        assignment_path = os.path.join(ASSIGNMENT_FOLDER, assignment_name)
+        if not os.path.exists(assignment_path):
+            os.makedirs(assignment_path)
+
+        # Save file with student's name to avoid conflicts
+        file_path = os.path.join(assignment_path, f"{student_name}_{file_name}")
+        with open(file_path, 'wb') as file:
+            file.write(file_content)
+
+        # Log submission in the JSON file
+        submissions[assignment_name] = submissions.get(assignment_name, []) + [{"student": student_name, "file": file_path}]
+        save_data(SUBMISSION_FILE, submissions)
+        return lms_pb2.UploadFileResponse(status=True, message="File uploaded successfully.")
+
+    def DownloadFile(self, request, context):
+        assignment_name = request.assignment_name
+        student_name = request.student_name
+
+        # Fetch the submission details
+        assignment_submissions = submissions.get(assignment_name, [])
+        for sub in assignment_submissions:
+            if sub['student'] == student_name:
+                file_path = sub['file']
+                if os.path.exists(file_path):
+                    with open(file_path, 'rb') as file:
+                        file_content = file.read()
+                    file_name = os.path.basename(file_path)
+                    return lms_pb2.DownloadFileResponse(status=True, file_content=file_content, file_name=file_name)
+        
+        return lms_pb2.DownloadFileResponse(status=False, message="File not found.")
+    
+    def CreateAssignment(self, request, context):
+        # Save the uploaded file in the assignment folder
+        try:
+            assignment_name = request.name
+            file_content = request.file_content
+            file_path = os.path.join(QUESTIONS_FOLDER, f"{assignment_name}.pdf")  # assuming a PDF, change extension as necessary
+            
+            with open(file_path, 'wb') as f:
+                f.write(file_content)
+            
+            # Respond with success message
+            return lms_pb2.AssignmentResponse(status="success", message="Assignment created and file uploaded successfully!")
+        except Exception as e:
+            return lms_pb2.AssignmentResponse(status="error", message=str(e))
+
+    
+    def GetAssignment(self, request, context):
+        # Fetch assignment details and provide file link
+        assignment_id = request.id
+        assignment_name = request.name
+        
+        # Construct file path
+        file_path = os.path.join(QUESTIONS_FOLDER, f"{assignment_name}.pdf")
+        
+        # Return assignment details along with file path
+        return lms_pb2.AssignmentDetails(
+            id=assignment_id,
+            name=assignment_name,
+            file_path=file_path
+        )
+    def ViewSubmission(self, request, context):
+        student_name = request.student_name
+        assignments1 = []  # List to store the assignment objects
+
+        if not os.path.exists(ASSIGNMENT_FOLDER):
+            context.set_details(f"Assignment folder does not exist: {ASSIGNMENT_FOLDER}")
+            context.set_code(grpc.StatusCode.UNKNOWN)
+            return lms_pb2.ViewSubmissionResponse(assignments=[])
+
+        # Iterate through each assignment directory to check if a submission exists for the student
+        for assignment_id in os.listdir(ASSIGNMENT_FOLDER):
+            assignment_path = os.path.join(ASSIGNMENT_FOLDER, assignment_id)
+            # Skip the 'questions' folder
+            if os.path.isdir(assignment_path) and assignment_id != "questions":
+                student_file = None
+                for file_name in os.listdir(assignment_path):
+                    if file_name.startswith(student_name):
+                        student_file = file_name
+                        break
+
+                file_url = f"file://{assignment_path}/{student_file}" if student_file else ""
+
+                assignments1.append(lms_pb2.Assignment(
+                    assignment_id=assignment_id,
+                    assignment_name=f"Assignment {assignment_id}",
+                    file_status="Uploaded" if student_file else "Not Uploaded",
+                    file_url=file_url
+                ))
+
+        # Return the response with the list of assignments
+        return lms_pb2.ViewSubmissionResponse(assignments=assignments1)
+    
+    
     def Get(self, request, context):
 
         student = request.token.split('_')[0]  # Extract student name from the token
@@ -62,12 +202,12 @@ class LMSServicer(lms_pb2_grpc.LMSServicer):
         if request.type == "view_assignments":
             # Show assignments that the student hasn't submitted yet
             pending_assignments = []
-            all_assignments=[]
-            for assignment_id in assignments:
-                all_assignments.append(assignment_id)
+            all_assignments = []
+            for assignment_id, assignment in assignments.items():
+                all_assignments.append(f"{assignment_id}: {assignment['name']}")
                 if assignment_id not in submissions or \
                         not any(sub['student'] == student for sub in submissions[assignment_id]):
-                    pending_assignments.append(assignment_id)
+                    pending_assignments.append(f"{assignment_id}: {assignment['name']}")
             
             return lms_pb2.GetResponse(status=True, data=all_assignments)
 
@@ -118,7 +258,7 @@ class LMSServicer(lms_pb2_grpc.LMSServicer):
             student_grades = []
             for assignment_id, assignment_submissions in submissions.items():
                 for sub in assignment_submissions:
-                    if sub.get('student') == student and 'grade' in sub:
+                    if student == sub.get('student') and 'grade' in sub:
                         # Include the assignment name with the grade
                         student_grades.append(f"Assignment: {assignment_id}, Grade: {sub['grade']}")
             return lms_pb2.GetResponse(status=True, data=student_grades)

@@ -20,6 +20,13 @@ service LMS {
     rpc Logout (LogoutRequest) returns (LogoutResponse);
 
     rpc GetUsers(GetUsersRequest) returns (GetUsersResponse);
+    rpc UploadFile(UploadFileRequest) returns (UploadFileResponse);
+    rpc DownloadFile(DownloadFileRequest) returns (DownloadFileResponse);
+    rpc CreateAssignment (AssignmentRequest) returns (AssignmentResponse);
+    rpc GetAssignment (AssignmentQuery) returns (AssignmentDetails);
+     // New RPC for viewing student's assignment submission
+    rpc ViewSubmission(ViewSubmissionRequest) returns (ViewSubmissionResponse);
+    rpc ViewQuestions (ViewQuestionsRequest) returns (ViewQuestionsResponse);  // New RPC method
 }
 
 // Request message for registering a new student
@@ -96,4 +103,82 @@ message GetUsersResponse {
 message User {
     string username = 1;
     string role = 2;
+}
+
+message UploadFileRequest {
+    string assignment_name = 1;
+    string student_name = 2;
+    bytes file_content = 3;
+    string file_name = 4;
+}
+
+message UploadFileResponse {
+    bool status = 1;
+    string message = 2;
+}
+
+message DownloadFileRequest {
+    string assignment_name = 1;
+    string student_name = 2;
+}
+
+message DownloadFileResponse {
+    bool status = 1;
+    bytes file_content = 2;
+    string file_name = 3;
+    string message = 4;
+}
+
+message AssignmentRequest {
+    string id = 1;
+    string name = 2;
+    bytes file_content = 3;
+}
+
+message AssignmentResponse {
+    string status = 1;  // Add this line to include the "status" field
+    string message = 2;
+}
+
+
+message AssignmentQuery {
+    string id = 1;
+    string name = 2;
+}
+
+message AssignmentDetails {
+    string id = 1;
+    string name = 2;
+    string file_path = 3;
+}
+
+// Request message to view a submission
+message ViewSubmissionRequest {
+    string student_name = 1;  // The name of the student
+}
+
+// Response message listing assignments and providing file link
+message ViewSubmissionResponse {
+    repeated Assignment assignments = 1; // List of assignments for the student
+    string file_url = 2;  // URL of the uploaded assignment file
+    bool file_exists = 3; // Whether the file exists or not
+}
+
+// Represents an assignment
+message Assignment {
+    string assignment_id = 1;  // Unique ID of the assignment
+    string assignment_name = 2;  // Name of the assignment
+    string file_status = 3; // "Uploaded" or "Not Uploaded"
+    string file_url = 4;  // Add this line
+}
+message ViewQuestionsRequest {}
+
+message AssignmentQuestion {
+    string assignment_id = 1;
+    string assignment_name = 2;
+    string file_url = 3;
+}
+
+message ViewQuestionsResponse {
+    repeated AssignmentQuestion questions = 1;
 }

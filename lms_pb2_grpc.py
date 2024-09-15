@@ -45,6 +45,36 @@ class LMSStub(object):
                 request_serializer=lms__pb2.GetUsersRequest.SerializeToString,
                 response_deserializer=lms__pb2.GetUsersResponse.FromString,
                 )
+        self.UploadFile = channel.unary_unary(
+                '/lms.LMS/UploadFile',
+                request_serializer=lms__pb2.UploadFileRequest.SerializeToString,
+                response_deserializer=lms__pb2.UploadFileResponse.FromString,
+                )
+        self.DownloadFile = channel.unary_unary(
+                '/lms.LMS/DownloadFile',
+                request_serializer=lms__pb2.DownloadFileRequest.SerializeToString,
+                response_deserializer=lms__pb2.DownloadFileResponse.FromString,
+                )
+        self.CreateAssignment = channel.unary_unary(
+                '/lms.LMS/CreateAssignment',
+                request_serializer=lms__pb2.AssignmentRequest.SerializeToString,
+                response_deserializer=lms__pb2.AssignmentResponse.FromString,
+                )
+        self.GetAssignment = channel.unary_unary(
+                '/lms.LMS/GetAssignment',
+                request_serializer=lms__pb2.AssignmentQuery.SerializeToString,
+                response_deserializer=lms__pb2.AssignmentDetails.FromString,
+                )
+        self.ViewSubmission = channel.unary_unary(
+                '/lms.LMS/ViewSubmission',
+                request_serializer=lms__pb2.ViewSubmissionRequest.SerializeToString,
+                response_deserializer=lms__pb2.ViewSubmissionResponse.FromString,
+                )
+        self.ViewQuestions = channel.unary_unary(
+                '/lms.LMS/ViewQuestions',
+                request_serializer=lms__pb2.ViewQuestionsRequest.SerializeToString,
+                response_deserializer=lms__pb2.ViewQuestionsResponse.FromString,
+                )
 
 
 class LMSServicer(object):
@@ -92,6 +122,44 @@ class LMSServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def UploadFile(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def DownloadFile(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def CreateAssignment(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetAssignment(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ViewSubmission(self, request, context):
+        """New RPC for viewing student's assignment submission
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ViewQuestions(self, request, context):
+        """New RPC method
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_LMSServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -124,6 +192,36 @@ def add_LMSServicer_to_server(servicer, server):
                     servicer.GetUsers,
                     request_deserializer=lms__pb2.GetUsersRequest.FromString,
                     response_serializer=lms__pb2.GetUsersResponse.SerializeToString,
+            ),
+            'UploadFile': grpc.unary_unary_rpc_method_handler(
+                    servicer.UploadFile,
+                    request_deserializer=lms__pb2.UploadFileRequest.FromString,
+                    response_serializer=lms__pb2.UploadFileResponse.SerializeToString,
+            ),
+            'DownloadFile': grpc.unary_unary_rpc_method_handler(
+                    servicer.DownloadFile,
+                    request_deserializer=lms__pb2.DownloadFileRequest.FromString,
+                    response_serializer=lms__pb2.DownloadFileResponse.SerializeToString,
+            ),
+            'CreateAssignment': grpc.unary_unary_rpc_method_handler(
+                    servicer.CreateAssignment,
+                    request_deserializer=lms__pb2.AssignmentRequest.FromString,
+                    response_serializer=lms__pb2.AssignmentResponse.SerializeToString,
+            ),
+            'GetAssignment': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetAssignment,
+                    request_deserializer=lms__pb2.AssignmentQuery.FromString,
+                    response_serializer=lms__pb2.AssignmentDetails.SerializeToString,
+            ),
+            'ViewSubmission': grpc.unary_unary_rpc_method_handler(
+                    servicer.ViewSubmission,
+                    request_deserializer=lms__pb2.ViewSubmissionRequest.FromString,
+                    response_serializer=lms__pb2.ViewSubmissionResponse.SerializeToString,
+            ),
+            'ViewQuestions': grpc.unary_unary_rpc_method_handler(
+                    servicer.ViewQuestions,
+                    request_deserializer=lms__pb2.ViewQuestionsRequest.FromString,
+                    response_serializer=lms__pb2.ViewQuestionsResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -235,5 +333,107 @@ class LMS(object):
         return grpc.experimental.unary_unary(request, target, '/lms.LMS/GetUsers',
             lms__pb2.GetUsersRequest.SerializeToString,
             lms__pb2.GetUsersResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def UploadFile(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/lms.LMS/UploadFile',
+            lms__pb2.UploadFileRequest.SerializeToString,
+            lms__pb2.UploadFileResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def DownloadFile(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/lms.LMS/DownloadFile',
+            lms__pb2.DownloadFileRequest.SerializeToString,
+            lms__pb2.DownloadFileResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def CreateAssignment(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/lms.LMS/CreateAssignment',
+            lms__pb2.AssignmentRequest.SerializeToString,
+            lms__pb2.AssignmentResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def GetAssignment(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/lms.LMS/GetAssignment',
+            lms__pb2.AssignmentQuery.SerializeToString,
+            lms__pb2.AssignmentDetails.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def ViewSubmission(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/lms.LMS/ViewSubmission',
+            lms__pb2.ViewSubmissionRequest.SerializeToString,
+            lms__pb2.ViewSubmissionResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def ViewQuestions(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/lms.LMS/ViewQuestions',
+            lms__pb2.ViewQuestionsRequest.SerializeToString,
+            lms__pb2.ViewQuestionsResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
