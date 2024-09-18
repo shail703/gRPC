@@ -10,7 +10,9 @@ token = ""
 
 def student_menu(stub):
     while True:
+        
         print("\n--- Student Menu ---")
+        print("9. Add Student Info")
         print("1. View Assignments")
         print("2. Submit Assignment")
         print("3. View Submitted and Pending Assignments")
@@ -37,6 +39,8 @@ def student_menu(stub):
             view_doubts(stub)
         elif choice == '8':
             logout(stub)
+        elif choice == '9':
+            add_student_info(stub)
             break
         else:
             print("Invalid choice. Please try again.")
@@ -193,6 +197,15 @@ def add_doubt(stub):
         print("Doubt added successfully.")
     else:
         print("Failed to add doubt.")
+        
+def add_student_info(stub):
+    std_id = input("Enter your ID number: ")
+    # std_cgpa =  input("Enter your previous SEM cgpa: ")
+    response = stub.Post(lms_pb2.PostRequest(token=token,type="add_student_info",data=std_id))
+    if response.status:
+        print("Info added successfully.")
+    else:
+        print("Failed to add Info.")
 
 def view_doubts(stub):
     doubt_type = input("Enter doubt type (unanswered/answered): ")
@@ -201,7 +214,7 @@ def view_doubts(stub):
         print("Doubts: ", response.data)
     else:
         print("Failed to retrieve doubts.")
-
+        
 def answer_doubts(stub):
     response = stub.Get(lms_pb2.GetRequest(token=token, type="view_doubts", optional_data="unanswered"))
     if response.status:
