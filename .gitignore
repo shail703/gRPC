@@ -5,4 +5,6 @@ __pycache__/
 submissions.json
 assignments.json
 doubts.json
+settings.json
 users.json
+gRPC.rar

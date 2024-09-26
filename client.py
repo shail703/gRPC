@@ -4,15 +4,20 @@ import lms_pb2_grpc
 import os
 import json
 import webbrowser
-
+import threading
+import time
 # Global variable to store the token after login
 token = ""
-
-def student_menu(stub):
+User = ""
+session_expired = False
+def student_menu(stub,stub2):
+    global session_expired
     while True:
-        
+        if session_expired:
+            # Exit from teacher_menu and return to main menu
+            print("Session expired. Returning to main menu...")
+            return
         print("\n--- Student Menu ---")
-        print("9. Add Student Info")
         print("1. View Assignments")
         print("2. Submit Assignment")
         print("3. View Submitted and Pending Assignments")
@@ -20,7 +25,8 @@ def student_menu(stub):
         print("5. View Grades")
         print("6. Add Doubt")
         print("7. View Doubts")
-        print("8. Logout")
+        print("8. ASK LLM")
+        print("9. Logout")
         choice = input("Enter your choice: ")
 
         if choice == '1':
@@ -37,40 +43,62 @@ def student_menu(stub):
             add_doubt(stub)
         elif choice == '7':
             view_doubts(stub)
-        elif choice == '8':
-            logout(stub)
         elif choice == '9':
-            add_student_info(stub)
+            logout(stub)
             break
+        elif choice == '8':
+            question= input("Enter you question - ")
+            query_llm(stub2, question)
         else:
             print("Invalid choice. Please try again.")
 
 def teacher_menu(stub):
+    global session_expired
     while True:
-        print("\n--- Teacher Menu ---")
-        print("1. Add Assignment")
-        print("2. View Uploaded Assignment")
-        print("3. Grade Assignment")
-        print("4. View Doubts")
-        print("5. Answer Doubts")
-        print("6. Logout")
-        choice = input("Enter your choice: ")
+            if session_expired:
+                # Exit from teacher_menu and return to main menu
+                print("Session expired. Returning to main menu...")
+                return
+            print("\n--- Teacher Menu ---")
+            print("1. Add Assignment")
+            print("2. View Uploaded Assignment")
+            print("3. Grade Assignment")
+            print("4. View Doubts")
+            print("5. Answer Doubts")
+            print("6. Add Study Material")
+            print("7. Logout")
+            choice = input("Enter your choice: ")
 
-        if choice == '1':
-            add_assignment(stub)
-        elif choice == '2':
-            view_uploaded_questions(stub)
-        elif choice == '3':
-            grade_assignment(stub)
-        elif choice == '4':
-            view_doubts(stub)
-        elif choice == '5':
-            answer_doubts(stub)
-        elif choice == '6':
-            logout(stub)
-            break
-        else:
-            print("Invalid choice. Please try again.")
+            if choice == '1':
+                add_assignment(stub)
+            elif choice == '2':
+                view_uploaded_questions(stub)
+            elif choice == '3':
+                grade_assignment(stub)
+            elif choice == '4':
+                view_doubts(stub)
+            elif choice == '5':
+                answer_doubts(stub)
+            elif choice == '6':
+                add_material(stub)
+            elif choice == '7':
+                logout(stub)
+                break
+            else:
+                print("Invalid choice. Please try again.")
+
+
+def query_llm(stub2, question):
+    # Send only the question to the LLM
+    llm_query = lms_pb2.LLMQueryRequest(question=question)
+    response = stub2.getLLMAnswer(llm_query)
+    print(response.answer)
+
+# Example usage:
+# answer = query_llm(stub, "What is the capital of France?")
+# print(answer)
+
+
 
 def add_assignment(stub):
     assignment_id = input("Enter assignment ID: ")
@@ -100,7 +128,27 @@ def add_assignment(stub):
         print(f"Success: {response.message}")
     else:
         print(f"Error: {response.message}")
+def add_material(stub):
+    material_name = input("Enter material Name: ")
+    file_path = input("Enter the file path to upload: ")
 
+    # Read the file content
+    with open(file_path, 'rb') as f:
+        file_content = f.read()
+    
+    # Create assignment request
+    request = lms_pb2.MaterialRequest(
+        name=material_name,
+        file_content=file_content
+    )
+    
+    # Call CreateAssignment RPC
+    response = stub.CreateMaterial(request)
+    # Handle the response status and message
+    if response.status == "success":
+        print(f"Success: {response.message}")
+    else:
+        print(f"Error: {response.message}")
 
 def view_assignment(stub):
     response = stub.Get(lms_pb2.GetRequest(token=token, type="view_assignments"))
@@ -117,11 +165,17 @@ def view_assignment(stub):
         name=assignment_name
     )
     
-    # Call GetAssignment RPC
-    response = stub.GetAssignment(request)
-    print(f"Assignment ID: {response.id}")
-    print(f"Assignment Name: {response.name}")
-    print(f"Download file here: {response.file_path}")
+    try:
+        # Call GetAssignment RPC
+        response = stub.GetAssignment(request)
+        print(f"Assignment ID: {response.id}")
+        print(f"Assignment Name: {response.name}")
+        print(f"Download file here: {response.file_path}")
+    except grpc.RpcError as e:
+        if e.code() == grpc.StatusCode.NOT_FOUND:
+            print(e.details())  # Prints "No assignment found with name ..."
+        else:
+            print(f"An error occurred: {e.details()}")
 
 
 def submit_assignment(stub):
@@ -197,15 +251,6 @@ def add_doubt(stub):
         print("Doubt added successfully.")
     else:
         print("Failed to add doubt.")
-        
-def add_student_info(stub):
-    std_id = input("Enter your ID number: ")
-    # std_cgpa =  input("Enter your previous SEM cgpa: ")
-    response = stub.Post(lms_pb2.PostRequest(token=token,type="add_student_info",data=std_id))
-    if response.status:
-        print("Info added successfully.")
-    else:
-        print("Failed to add Info.")
 
 def view_doubts(stub):
     doubt_type = input("Enter doubt type (unanswered/answered): ")
@@ -214,7 +259,7 @@ def view_doubts(stub):
         print("Doubts: ", response.data)
     else:
         print("Failed to retrieve doubts.")
-        
+
 def answer_doubts(stub):
     response = stub.Get(lms_pb2.GetRequest(token=token, type="view_doubts", optional_data="unanswered"))
     if response.status:
@@ -292,67 +337,106 @@ def submit_assignment(stub):
         print("Failed to submit assignment:", response.message)
         
 def view_uploaded_questions(stub):
-    # Requesting the list of uploaded assignment questions
-    response = stub.ViewQuestions(lms_pb2.ViewQuestionsRequest())
+    try:
+        # Requesting the list of uploaded assignment questions
+        response = stub.ViewQuestions(lms_pb2.ViewQuestionsRequest())
 
-    if not response.questions:
-        print("No assignment questions found.")
-        return
+        if not response.questions:
+            print("No assignments found.")
+            return
 
-    # Display the assignment questions with their details
-    print("\nUploaded Assignment Questions:")
-    for question in response.questions:
-        print(f"ID: {question.assignment_id}, Name: {question.assignment_name}")
-        if question.file_url:
-            normalized_url=question.file_url.replace('\\','/')
-            print(f"File URL: {normalized_url}")
-        else:
-            print("No file URL available.")
-def logout(stub):
-    response = stub.Logout(lms_pb2.LogoutRequest(token=token))
-    if response.status:
-        print("Logged out successfully.")
-    else:
-        print("Failed to logout.")
-
-def main():
-    with grpc.insecure_channel('localhost:50051') as channel:
-        stub = lms_pb2_grpc.LMSStub(channel)
-        while True:
-            print("\n--- Main Menu ---")
-            print("1. Register")
-            print("2. Login")
-            print("3. Exit")
-            choice = input("Enter your choice: ")
-
-            if choice == '1':
-                username = input("Enter username: ")
-                password = input("Enter password: ")
-                role = 'student'
-                response = stub.RegisterStudent(lms_pb2.RegisterRequest(username=username, password=password))
-                if response.status:
-                    print("Registration successful.")
-                else:
-                    print("Failed to register:", response.message)
-            elif choice == '2':
-                username = input("Enter username: ")
-                password = input("Enter password: ")
-                response = stub.Login(lms_pb2.LoginRequest(username=username, password=password))
-                if response.status:
-                    global token
-                    global User
-                    User=username
-                    token = response.token
-                    if username == "teacher":
-                        teacher_menu(stub)
-                    else:
-                        student_menu(stub)
-                else:
-                    print("Failed to login:", response.message)
-            elif choice == '3':
-                break
+        # Display the assignment questions with their details
+        print("\nUploaded Assignment Questions:")
+        for question in response.questions:
+            print(f"ID: {question.assignment_id}, Name: {question.assignment_name}")
+            if question.file_url:
+                normalised_url=question.file_url.replace('\\','/')
+                print(f"File URL: {normalised_url}")
             else:
-                print("Invalid choice. Please try again.")
+                print("No file URL available.")
+    except grpc.RpcError as e:
+        if e.code() == grpc.StatusCode.NOT_FOUND:
+            print(e.details())  # This will print "No assignments/questions found."
+        else:
+            print(f"An error occurred: {e.details()}")
+def logout_periodically(stub):
+    global token, session_expired
+    while True:
+        time.sleep(600)  # Wait for 600 seconds
+        if token:
+            print("\nSession timed out. Logging out...")
+            logout(stub)
+            token = ""  # Clear the token after logout
+            session_expired = True
+            print("Returning to main menu...")
 
+def logout(stub):
+    global token
+    if token:
+        response = stub.Logout(lms_pb2.LogoutRequest(token=token))
+        if response.status:
+            print("Logged out successfully.")
+        else:
+            print("Failed to logout.")
+        
+def main():
+    global token, User, session_expired
+    session_expired = False
+    
+    with grpc.insecure_channel('localhost:50052') as llm_channel:
+        stub2 = lms_pb2_grpc.LLMServiceStub(llm_channel)
+
+        with grpc.insecure_channel('localhost:50051') as channel:
+            stub = lms_pb2_grpc.LMSStub(channel)
+
+
+            # Start the logout timer thread
+            logout_thread = threading.Thread(target=logout_periodically, args=(stub,), daemon=True)
+            logout_thread.start()
+            
+            while True:
+                if session_expired:
+                    # Reset the session expired flag and continue to the main menu
+                    session_expired = False
+                    continue  # Skip the rest of the loop and show the main menu again
+                # Show the main menu
+                #question = "Colour of sky?"
+                #print(query_llm(stub2, question))
+                print("\n--- Main Menu ---")
+                print("1. Register")
+                print("2. Login")
+                print("3. Exit")
+                choice = input("Enter your choice: ")
+
+                if choice == '1':
+                    username = input("Enter username: ")
+                    password = input("Enter password: ")
+                    role = 'student'
+                    response = stub.RegisterStudent(lms_pb2.RegisterRequest(username=username, password=password))
+                    if response.status:
+                        print("Registration successful.")
+                    else:
+                        print("Failed to register:", response.message)
+                elif choice == '2':
+                    username = input("Enter username: ")
+                    password = input("Enter password: ")
+                    response = stub.Login(lms_pb2.LoginRequest(username=username, password=password))
+                    if response.status:
+                        token = response.token
+                        User = username
+                        session_expired = False
+                        if username == "teacher":
+                            teacher_menu(stub)
+                        else:
+                            student_menu(stub,stub2)
+                    else:
+                        print("Failed to login:", response.message)
+                elif choice == '3':
+                    break
+                else:
+                    print("Invalid choice. Please try again.")
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\nClient terminated.")

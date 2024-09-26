@@ -27,6 +27,21 @@ service LMS {
      // New RPC for viewing student's assignment submission
     rpc ViewSubmission(ViewSubmissionRequest) returns (ViewSubmissionResponse);
     rpc ViewQuestions (ViewQuestionsRequest) returns (ViewQuestionsResponse);  // New RPC method
+   // rpc getLLMAnswer(LLMQueryRequest) returns (LLMQueryResponse);
+    rpc CreateMaterial (MaterialRequest) returns (MaterialResponse);
+}
+message LLMQueryRequest {
+    string question = 1;
+}
+
+message LLMQueryResponse {
+    string answer = 1;
+}
+service LLMService {
+    // Existing methods
+
+    // LLM query method
+    rpc getLLMAnswer(LLMQueryRequest) returns (LLMQueryResponse);
 }
 
 // Request message for registering a new student
@@ -139,7 +154,15 @@ message AssignmentResponse {
     string status = 1;  // Add this line to include the "status" field
     string message = 2;
 }
+message MaterialRequest {
+    string name = 1;
+    bytes file_content = 2;
+}
 
+message MaterialResponse {
+    string status = 1;  // Add this line to include the "status" field
+    string message = 2;
+}
 
 message AssignmentQuery {
     string id = 1;
