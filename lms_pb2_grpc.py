@@ -623,7 +623,7 @@ class LMS(object):
             metadata,
             _registered_method=True)
 
-
+## client side stub for llm related grpc request
 class LLMServiceStub(object):
     """Existing methods
     """

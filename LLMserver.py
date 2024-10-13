@@ -7,6 +7,8 @@ import torch
 import os
 import re
 from transformers import GPT2Tokenizer, GPT2LMHeadModel, pipeline
+import sys
+import time
 
 # Define the device for transformers
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -136,7 +138,24 @@ def serve():
     server.add_insecure_port('[::]:50052')  # LLM Server runs on port 50052
     server.start()
     print("Server Started")
-    server.wait_for_termination()
+    try:
+        # Wait for 5 minutes or until a manual interruption
+        server.wait_for_termination(timeout=30)
+    except grpc.RpcError:
+        print("Server timed out after 5 minutes.")
+    except KeyboardInterrupt:
+        print("Server interrupted manually. Shutting down...")
+        server.stop(0)  # Stop the server immediately
+        sys.exit(0)  # Exit the script without restarting
+    else:
+        # If no exception occurs (server times out), restart it
+        print("Restarting server...")
+        python = sys.executable
+        os.execv(python, ['python'] + sys.argv)
 
 if __name__ == '__main__':
-    serve()
+    try:
+        serve()
+    except KeyboardInterrupt:
+        print("Manual termination. Exiting...")
+        sys.exit(0)
