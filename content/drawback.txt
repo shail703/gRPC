@@ -1,0 +1,5 @@
+Drawbacks of RPC
+
+	1	Latency: Network calls in RPC can lead to significant delays compared to local calls.
+	2	Fault Tolerance: Failure in one part of the distributed system may lead to overall failure unless handled carefully.
+	3	Scalability: Synchronous RPC can cause bottlenecks, especially when a large number of remote calls are made simultaneously.
