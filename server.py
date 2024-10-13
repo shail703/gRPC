@@ -4,6 +4,7 @@ import lms_pb2
 import lms_pb2_grpc
 import json
 import os
+import shutil
 # File paths for storing users, assignments, submissions, and doubts
 USER_FILE = 'users.json'
 ASSIGNMENT_FILE = 'assignments.json'
@@ -11,7 +12,7 @@ SUBMISSION_FILE = 'submissions.json'
 DOUBT_FILE = 'doubts.json'
 ASSIGNMENT_FOLDER = 'assignments'  # Folder to store assignment submissions
 QUESTIONS_FOLDER = os.path.join(ASSIGNMENT_FOLDER, 'questions')
-
+MATERIAL_FOLDER='content'
 # Load data from JSON files
 def load_data(file_path):
     if os.path.exists(file_path):
@@ -36,13 +37,37 @@ if not os.path.exists(ASSIGNMENT_FOLDER):
 # Ensure folder structure exists
 if not os.path.exists(QUESTIONS_FOLDER):
     os.makedirs(QUESTIONS_FOLDER)
-
+# Create content directory if it doesn't exist
+if not os.path.exists(MATERIAL_FOLDER):
+    os.makedirs(MATERIAL_FOLDER)
 # Hardcoded teacher account
 if "teacher" not in users:
     users["teacher"] = {"password": "1234", "role": "teacher"}
     save_data(USER_FILE, users)
 
+class LLMService(lms_pb2_grpc.LLMServiceServicer):
+    # Existing methods
+
+    def getLLMAnswer(self, request, context):
+        question = request.question  # Take the student's question
+        
+        try:
+            # Here you would normally forward the request to an LLM server or process it
+            # For now, we'll return a simple placeholder response
+            llm_response = "This is a response to: " + question
+            
+            # Create and return the LLMQueryResponse message
+            return lms_pb2.LLMQueryResponse(answer=llm_response)
+        
+        except Exception as e:
+            # Handle exceptions and provide a meaningful error message
+            context.set_details(f"An error occurred: {str(e)}")
+            context.set_code(grpc.StatusCode.INTERNAL)
+            return lms_pb2.LLMQueryResponse(answer="An internal error occurred.")
+
+
 class LMSServicer(lms_pb2_grpc.LMSServicer):
+
     def RegisterStudent(self, request, context):
         if request.username in users:
             return lms_pb2.RegisterResponse(status=False, message="User already exists.")
@@ -68,15 +93,24 @@ class LMSServicer(lms_pb2_grpc.LMSServicer):
         # Define paths
         questions_folder = os.path.join(ASSIGNMENT_FOLDER, "questions")
 
-        # Read assignments information from JSON file
-        with open(ASSIGNMENT_FILE, 'r') as file:
-            assignments_info = json.load(file)
-
-        if not os.path.exists(questions_folder):
-            error_msg = f"Questions folder does not exist: {questions_folder}"
+        try:
+            # Try reading assignments information from JSON file
+            with open(ASSIGNMENT_FILE, 'r') as file:
+                assignments_info = json.load(file)
+        except (FileNotFoundError, json.JSONDecodeError):
+            # Return message if the JSON file is missing or corrupted
+            error_msg = "No assignments found."
             print(error_msg)
             context.set_details(error_msg)
-            context.set_code(grpc.StatusCode.UNKNOWN)
+            context.set_code(grpc.StatusCode.NOT_FOUND)
+            return lms_pb2.ViewQuestionsResponse(questions=[])
+
+            # Check if questions folder exists and contains files
+        if not os.path.exists(questions_folder) or not os.listdir(questions_folder):
+            error_msg = "No assignments found."
+            print(error_msg)
+            context.set_details(error_msg)
+            context.set_code(grpc.StatusCode.NOT_FOUND)
             return lms_pb2.ViewQuestionsResponse(questions=[])
 
         for assignment_id, info in assignments_info.items():
@@ -146,7 +180,20 @@ class LMSServicer(lms_pb2_grpc.LMSServicer):
         except Exception as e:
             return lms_pb2.AssignmentResponse(status="error", message=str(e))
 
-    
+    def CreateMaterial(self, request, context):
+        # Save the uploaded file in the assignment folder
+        try:
+            material_name = request.name
+            file_content = request.file_content
+            file_path = os.path.join(MATERIAL_FOLDER, f"{material_name}.txt")  # assuming a PDF, change extension as necessary
+            
+            with open(file_path, 'wb') as f:
+                f.write(file_content)
+            
+            # Respond with success message
+            return lms_pb2.MaterialResponse(status="success", message="Study material created and file uploaded successfully!")
+        except Exception as e:
+            return lms_pb2.MaterialResponse(status="error", message=str(e))
     def GetAssignment(self, request, context):
         # Fetch assignment details and provide file link
         assignment_id = request.id
@@ -154,6 +201,15 @@ class LMSServicer(lms_pb2_grpc.LMSServicer):
         
         # Construct file path
         file_path = os.path.join(QUESTIONS_FOLDER, f"{assignment_name}.pdf")
+        
+            # Check if the file exists
+        if not os.path.isfile(file_path):
+            # Return error if the file does not exist
+            error_msg = f"No assignment found with name '{assignment_name}'."
+            print(error_msg)
+            context.set_details(error_msg)
+            context.set_code(grpc.StatusCode.NOT_FOUND)
+            return lms_pb2.AssignmentDetails()  # Return empty response
         
         # Return assignment details along with file path
         return lms_pb2.AssignmentDetails(
@@ -327,6 +383,7 @@ class LMSServicer(lms_pb2_grpc.LMSServicer):
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     lms_pb2_grpc.add_LMSServicer_to_server(LMSServicer(), server)
+    lms_pb2_grpc.add_LLMServiceServicer_to_server(LLMService(), server)
     server.add_insecure_port('[::]:50051')
     print("Server started on port 50051")
     server.start()
