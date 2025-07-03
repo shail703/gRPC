@@ -1,0 +1,124 @@
+Remote Procedure Call (RPC)
+
+Remote Procedure Call (RPC) is a protocol that allows a program to execute a procedure (function) on a different address space (commonly on another machine in a distributed network) as if it were executing locally. It abstracts the details of network communication, making the remote invocation process feel like a local function call.
+
+1. RPC Overview
+
+	•	RPC enables communication between programs running on different computers in a distributed system.
+	•	It hides the complexities of the network, such as socket communication, data serialization, and error handling, making distributed computing simpler.
+	•	The calling process (client) sends a request to the remote process (server), which executes the requested procedure and sends the result back to the client.
+
+2. How RPC Works
+
+	•	Client Stub: The client calls a local procedure (stub), which marshals (serializes) the arguments and sends them across the network to the server.
+	•	Server Stub: The server receives the request, unmarshals (deserializes) the arguments, executes the corresponding remote procedure, and returns the result to the client.
+	•	Steps:
+	1.	Client invokes the RPC function.
+	2.	Client stub packages (marshals) the function parameters and sends the request.
+	3.	Server stub unpacks (unmarshals) the parameters and calls the actual remote procedure.
+	4.	The server procedure executes and sends the result back.
+	5.	Client stub receives the result and returns it to the client application.
+
+3. Features of RPC
+
+	•	Transparency: RPC abstracts the complexities of networking, making remote function calls look like local calls.
+	•	Simplicity: Developers do not need to manually handle socket programming or message passing.
+	•	Error Handling: RPC must handle errors like network failures or crashes on the server side.
+	•	Language Independence: RPC can be used between systems with different operating systems or programming languages using various encoding methods (e.g., JSON, XML, Protocol Buffers).
+	•	Synchronous and Asynchronous RPC:
+	•	Synchronous RPC: The client waits for the server to complete the operation and return a result.
+	•	Asynchronous RPC: The client can proceed with other tasks while waiting for the server’s response.
+
+4. RPC Components
+
+	•	Stub (Client and Server Stubs): Acts as a proxy, packaging requests and responses between the client and server.
+	•	Binding: Establishes the connection between the client and server, usually through a unique identifier like an IP address and port number.
+	•	Marshaller/UnMarshaller: Responsible for converting the function arguments and return values into a format suitable for transmission across the network.
+	•	Transport Protocol: Handles the communication between the client and server, often using protocols like TCP, UDP, or HTTP.
+
+5. RPC Implementations
+
+	•	ONC RPC (Open Network Computing RPC): Used in Unix-like operating systems.
+	•	DCE RPC (Distributed Computing Environment RPC): A framework developed by OSF.
+	•	gRPC: Modern, open-source, high-performance RPC framework developed by Google, using Protocol Buffers for data serialization.
+	•	Java RMI (Remote Method Invocation): An RPC implementation specific to Java for invoking methods across JVMs.
+
+6. Drawbacks of RPC
+
+	•	Latency: Network calls in RPC can lead to significant delays compared to local calls.
+	•	Fault Tolerance: Failure in one part of the distributed system may lead to overall failure unless handled carefully.
+	•	Scalability: Synchronous RPC can cause bottlenecks, especially when a large number of remote calls are made simultaneously.
+
+Distributed Operating Systems (DOS)
+
+Distributed Operating Systems manage a collection of independent computers and make them appear to the users as a single coherent system. These systems allow resource sharing, communication, and coordination between computers, which are typically spread over a network.
+
+1. Characteristics of Distributed Operating Systems
+
+	•	Transparency: The system hides the complexity of the network from users and applications. Several types of transparency include:
+	•	Location Transparency: Users cannot tell where resources are physically located.
+	•	Replication Transparency: Users are unaware of the replication of resources.
+	•	Concurrency Transparency: Multiple users can access resources simultaneously without interference.
+	•	Failure Transparency: The system hides hardware and software failures from users.
+	•	Resource Sharing: The system allows sharing of hardware (CPU, memory, disks) and software resources (files, databases) across multiple machines.
+	•	Scalability: Distributed OS must efficiently manage and scale up as the number of computers or resources grows.
+	•	Fault Tolerance: The OS can recover from hardware or software failures by reassigning tasks or replicating resources.
+	•	Load Balancing: Distributes the computational load evenly across the system to optimize performance.
+
+2. Types of Distributed Operating Systems
+
+	•	Network Operating Systems (NOS): Systems like Unix, Windows, or Linux that use networking to allow communication and resource sharing between independent computers but don’t appear as a single coherent system.
+	•	True Distributed Operating Systems: Provides a unified OS that controls multiple interconnected computers and presents them as a single machine to users, e.g., Amoeba, Chorus, and Inferno OS.
+
+3. Components of Distributed Operating Systems
+
+	•	Processor Management: The system distributes tasks across multiple processors or nodes to optimize the overall performance.
+	•	Memory Management: Memory is managed across all the nodes in a way that seems unified to the user.
+	•	File System: Distributed File Systems (DFS) such as NFS (Network File System) or Google File System (GFS) allow the storage of files across multiple nodes while maintaining consistency.
+	•	Networking: Distributed OS manages inter-node communication through message passing, RPC, and high-speed networking protocols.
+	•	Concurrency Control: Mechanisms like semaphores, locks, and monitors to manage simultaneous access to shared resources.
+	•	Security: Ensures that data and resources are secure from unauthorized access, even when distributed over many nodes.
+
+4. Distributed System Models
+
+	•	Client-Server Model: Clients request services from servers, which perform tasks and return the results.
+	•	Peer-to-Peer (P2P) Model: Each node in the system can act as both a client and a server, sharing resources equally without central control.
+	•	Hybrid Model: A combination of client-server and P2P models, often seen in distributed computing frameworks like Hadoop.
+
+5. Distributed File Systems (DFS)
+
+	•	Features: DFS allows multiple users to access files stored across different locations as if they were located on their local machine.
+	•	Examples:
+	•	NFS (Network File System): Allows file sharing across Unix-like systems.
+	•	HDFS (Hadoop Distributed File System): Designed for storing large datasets across a cluster of machines.
+	•	File Caching: DFS uses caching to speed up access to frequently used files and directories.
+	•	Replication: To improve availability and fault tolerance, files can be replicated across different nodes.
+
+6. Synchronization in Distributed Systems
+
+	•	Logical Clocks: Techniques like Lamport Timestamps ensure that events are ordered correctly across distributed systems.
+	•	Distributed Mutual Exclusion: Algorithms like Ricart–Agrawala or token-based algorithms help manage access to shared resources.
+	•	Distributed Deadlock Handling:
+	•	Deadlock Prevention: Avoidance algorithms that prevent circular waits.
+	•	Deadlock Detection and Recovery: Periodic checks to detect and resolve deadlocks.
+
+7. Fault Tolerance in Distributed Systems
+
+	•	Replication: Data is replicated across multiple nodes to ensure availability even in case of hardware failures.
+	•	Checkpointing: The system periodically saves the state of processes so they can be resumed after a failure.
+	•	Reconfiguration: When a failure occurs, the system dynamically reassigns tasks to other functioning nodes.
+
+8. Advantages of Distributed Operating Systems
+
+	•	Resource Sharing: Enables sharing of resources like files, applications, and hardware across multiple machines.
+	•	Scalability: The system can grow by adding more nodes without significant changes to the underlying OS.
+	•	Reliability and Fault Tolerance: Replication and failover techniques improve system reliability.
+	•	Performance: By distributing workloads across multiple nodes, distributed OS can improve the performance of resource-intensive applications.
+
+9. Examples of Distributed Operating Systems
+
+	•	Amoeba: A microkernel-based system designed for efficient resource sharing.
+	•	Chorus: A real-time distributed OS with support for microkernels.
+	•	Inferno OS: Developed for building distributed systems, known for its virtual machine-based architecture.
+
+Both RPC and Distributed Operating Systems play a critical role in managing and optimizing distributed environments, enabling efficient communication, resource sharing, and system coordination across multiple computers in a network.

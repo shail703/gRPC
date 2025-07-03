@@ -9,6 +9,7 @@ import re
 from transformers import GPT2Tokenizer, GPT2LMHeadModel, pipeline
 import sys
 import time
+import threading
 
 # Define the device for transformers
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -94,10 +95,16 @@ def handle_math_query(question):
         except Exception as e:
             return "Error in evaluating the arithmetic expression."
     return None
-
+# Global variable to store content data
+content_data = {}
 # Load the content from files (e.g., lectures or PPTs in text form)
 content_folder_path = 'content'
-content_data = load_content_files(content_folder_path)
+def refresh_content_data(content_folder_path, interval=10):
+    global content_data
+    while True:
+        content_data = load_content_files(content_folder_path)
+        print("Content data refreshed!")
+        time.sleep(interval)
 
 # Define the LLM service using gRPC
 class LLMService(lms_pb2_grpc.LLMServiceServicer):
@@ -135,27 +142,12 @@ class LLMService(lms_pb2_grpc.LLMServiceServicer):
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     lms_pb2_grpc.add_LLMServiceServicer_to_server(LLMService(), server)
-    server.add_insecure_port('[::]:50052')  # LLM Server runs on port 50052
+    server.add_insecure_port('192.168.204.145:5055')  # LLM Server runs on port 50052
     server.start()
     print("Server Started")
-    try:
-        # Wait for 5 minutes or until a manual interruption
-        server.wait_for_termination(timeout=30)
-    except grpc.RpcError:
-        print("Server timed out after 5 minutes.")
-    except KeyboardInterrupt:
-        print("Server interrupted manually. Shutting down...")
-        server.stop(0)  # Stop the server immediately
-        sys.exit(0)  # Exit the script without restarting
-    else:
-        # If no exception occurs (server times out), restart it
-        print("Restarting server...")
-        python = sys.executable
-        os.execv(python, ['python'] + sys.argv)
+    content_refresh_thread = threading.Thread(target=refresh_content_data, args=(content_folder_path,), daemon=True)
+    content_refresh_thread.start()
+    server.wait_for_termination()
 
 if __name__ == '__main__':
-    try:
-        serve()
-    except KeyboardInterrupt:
-        print("Manual termination. Exiting...")
-        sys.exit(0)
+    serve()

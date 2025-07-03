@@ -6,6 +6,8 @@ import json
 import webbrowser
 import threading
 import time
+import re
+
 # Global variable to store the token after login
 token = ""
 User = ""
@@ -379,64 +381,102 @@ def logout(stub):
         else:
             print("Failed to logout.")
         
-def main():
+def main_loop():
     global token, User, session_expired
     session_expired = False
-    
-    with grpc.insecure_channel('localhost:50052') as llm_channel:
-        stub2 = lms_pb2_grpc.LLMServiceStub(llm_channel)
 
-        with grpc.insecure_channel('localhost:50051') as channel:
-            stub = lms_pb2_grpc.LMSStub(channel)
+    ip_list = get_ip_list()
 
-
-            # Start the logout timer thread
-            logout_thread = threading.Thread(target=logout_periodically, args=(stub,), daemon=True)
-            logout_thread.start()
+    while True:
+        try:
+            # Attempt to connect to LMS server
+            stub = connect_to_lms(ip_list)
             
-            while True:
-                if session_expired:
-                    # Reset the session expired flag and continue to the main menu
-                    session_expired = False
-                    continue  # Skip the rest of the loop and show the main menu again
-                # Show the main menu
-                #question = "Colour of sky?"
-                #print(query_llm(stub2, question))
-                print("\n--- Main Menu ---")
-                print("1. Register")
-                print("2. Login")
-                print("3. Exit")
-                choice = input("Enter your choice: ")
+            # Connect to the LLM service on localhost
+            with grpc.insecure_channel("192.168.204.145:5055") as llm_channel:
+                stub2 = lms_pb2_grpc.LLMServiceStub(llm_channel)
 
-                if choice == '1':
-                    username = input("Enter username: ")
-                    password = input("Enter password: ")
-                    role = 'student'
-                    response = stub.RegisterStudent(lms_pb2.RegisterRequest(username=username, password=password))
-                    if response.status:
-                        print("Registration successful.")
-                    else:
-                        print("Failed to register:", response.message)
-                elif choice == '2':
-                    username = input("Enter username: ")
-                    password = input("Enter password: ")
-                    response = stub.Login(lms_pb2.LoginRequest(username=username, password=password))
-                    if response.status:
-                        token = response.token
-                        User = username
+                # Start the logout timer thread
+                logout_thread = threading.Thread(target=logout_periodically, args=(stub,), daemon=True)
+                logout_thread.start()
+                
+                # Main menu loop
+                while True:
+                    if session_expired:
+                        # Reset the session expired flag and continue to the main menu
                         session_expired = False
-                        if username == "teacher":
-                            teacher_menu(stub)
+                        continue
+                    print("\n--- Main Menu ---")
+                    print("1. Register")
+                    print("2. Login")
+                    print("3. Exit")
+                    choice = input("Enter your choice: ")
+
+                    if choice == '1':
+                        username = input("Enter username: ")
+                        password = input("Enter password: ")
+                        response = stub.RegisterStudent(lms_pb2.RegisterRequest(username=username, password=password))
+                        if response.status:
+                            print("Registration successful.")
                         else:
-                            student_menu(stub,stub2)
+                            print("Failed to register:", response.message)
+                    elif choice == '2':
+                        username = input("Enter username: ")
+                        password = input("Enter password: ")
+                        response = stub.Login(lms_pb2.LoginRequest(username=username, password=password))
+                        if response.status:
+                            token = response.token
+                            User = username
+                            session_expired = False
+                            if username == "teacher":
+                                teacher_menu(stub)
+                            else:
+                                student_menu(stub, stub2)
+                        else:
+                            print("Failed to login:", response.message)
+                    elif choice == '3':
+                        print("Exiting...")
+                        return  # Exit the program
                     else:
-                        print("Failed to login:", response.message)
-                elif choice == '3':
-                    break
-                else:
-                    print("Invalid choice. Please try again.")
+                        print("Invalid choice. Please try again.")
+        except (grpc.RpcError, ConnectionError) as e:
+            print(f"Connection lost or failed: {e}. Reconnecting...")
+            time.sleep(5)  # Wait before retrying
+
+def get_ip_list(filename='ip_list.txt'):
+    """Reads the IP addresses from a file and returns them as a list of IPs with incremented ports."""
+    ip_list = []
+    with open(filename, 'r') as file:
+        for line in file:
+            match = re.match(r"http://(.*):(\d+)", line.strip())
+            if match:
+                ip = match.group(1)
+                port = int(match.group(2)) + 1  # Increment port by 1
+                ip_list.append(f"{ip}:{port}")
+    return ip_list
+
+def connect_to_lms(ip_list):
+    """Attempts to connect to each IP in the list with incremented port and returns the first successful stub."""
+    for ip in ip_list:
+        try:
+            # Attempt to open a channel to the incremented IP address
+            channel = grpc.insecure_channel(ip)
+            stub = lms_pb2_grpc.LMSStub(channel)
+            # Test the channel connectivity
+            grpc.channel_ready_future(channel).result(timeout=5)  # Wait until the channel is ready
+            print(f"Connected to LMS at {ip}")
+            return stub  # Return the stub if connection is successful
+        except grpc.RpcError as e:
+            print(f"Failed to connect to {ip}: {e}")
+        except Exception as e:
+            print(f"An error occurred while trying to connect to {ip}: {e}")
+    raise ConnectionError("Could not connect to any IP addresses from ip_list.txt")
+
+
+
+
 if __name__ == "__main__":
     try:
-        main()
+        main_loop()
     except KeyboardInterrupt:
         print("\nClient terminated.")
