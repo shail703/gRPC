@@ -1,7 +1,6 @@
 # Distributed gRPC-based Learning-Management System  
 ## (Raft + gRPC Project — Milestone 3)
 
-![Raft × gRPC](docs/banner.png)
 
 Milestone 3 brings the whole project together: a **fault-tolerant Learning-Management
 System (LMS)** that replicates state across multiple nodes with the Raft consensus
